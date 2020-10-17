@@ -38,7 +38,7 @@ int main(int argc, char** argv){
 
    // Send the goal position and orientation for the robot to reach
   ros::Duration(5).sleep();
-  ROS_INFO("Sending pickup location");
+  ROS_INFO("moving to pickup location");
   ac.sendGoal(goal);
 
   // Wait an infinite time for the results
@@ -54,9 +54,9 @@ int main(int argc, char** argv){
     ROS_INFO("The Robot failed to reach pickup location"); 
   }
 
-  ROS_INFO("picking up ...");
+  ROS_INFO("waiting ...");
   ros::Duration(5).sleep();
-  ROS_INFO("picked up ...");
+  ROS_INFO("Picked up!");
 
   goal.target_pose.pose.position.x = -3.0;
   goal.target_pose.pose.position.y = -4.0;
@@ -75,7 +75,7 @@ int main(int argc, char** argv){
   else
     ROS_INFO("The Robot failed to reach drop off location");
 
-  ROS_INFO("Dropped off");  
+  ROS_INFO("Dropped off!");  
 
   return 0;
 }
