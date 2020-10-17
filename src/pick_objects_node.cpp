@@ -4,6 +4,10 @@
 
 // Define a client for to send goal requests to the move_base server through a SimpleActionClient
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
+bool at_pickup_location = false;
+bool at_dropoff_location = false;
+bool picked_up = false;
+bool dropped_off =false;
 
 int main(int argc, char** argv){
   // Initialize the simple_navigation_goals node
@@ -19,26 +23,59 @@ int main(int argc, char** argv){
 
   move_base_msgs::MoveBaseGoal goal;
 
+  //seting rosparam to communicate with add_markers node
+  ros::param::set("/at_pickup_location",at_pickup_location);
+  ros::param::set("/at_dropoff_location",at_dropoff_location);
+
   // set up the frame parameters
   goal.target_pose.header.frame_id = "map";
   goal.target_pose.header.stamp = ros::Time::now();
 
   // Define a position and orientation for the robot to reach
   goal.target_pose.pose.position.x = 1.0;
+  goal.target_pose.pose.position.y = -2.0;
   goal.target_pose.pose.orientation.w = 1.0;
 
    // Send the goal position and orientation for the robot to reach
-  ROS_INFO("Sending goal");
+  ros::Duration(5).sleep();
+  ROS_INFO("Sending pickup location");
   ac.sendGoal(goal);
 
   // Wait an infinite time for the results
   ac.waitForResult();
 
   // Check if the robot reached its goal
+  if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
+    ROS_INFO("Reached pickup location");
+    at_pickup_location = true;
+    ros::param::set("/at_pickup_location",at_pickup_location);
+  }
+  else{
+    ROS_INFO("The Robot failed to reach pickup location"); 
+  }
+
+  ROS_INFO("picking up ...");
+  ros::Duration(5).sleep();
+  ROS_INFO("picked up ...");
+
+  goal.target_pose.pose.position.x = -3.0;
+  goal.target_pose.pose.position.y = -4.0;
+  goal.target_pose.pose.orientation.w = 1.0;
+
+  ROS_INFO("moving to drop off location");
+  ac.sendGoal(goal);
+  ac.waitForResult();
+
   if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-    ROS_INFO("Hooray, the base moved 1 meter forward");
+  {
+    ROS_INFO("Robot reached drop off location");
+    at_dropoff_location =true;
+    ros::param::set("/at_dropoff_location",at_dropoff_location);
+  }
   else
-    ROS_INFO("The base failed to move forward 1 meter for some reason");
+    ROS_INFO("The Robot failed to reach drop off location");
+
+  ROS_INFO("Dropped off");  
 
   return 0;
 }
